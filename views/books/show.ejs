@@ -1,0 +1,96 @@
+<% layout('layouts/boilerplate') %>
+
+<div class="container border-3">
+    <div class="row">
+        <div class="col-md-6 mb-3">
+            <div class="row">
+                <div class="col-6 offset-3">
+                    <img src="<%=book.cover%>" class="img-thumbnail mt-3 ms-5" alt="" style="width: 15rem;">
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 mt-3">
+            <h2 class="display-6 text-sm"><%=book.name%></h2>
+            <p class="text-muted"><%=book.author%>
+                <h5>What it is about?</h5>
+                <p class="me-5 mt-3"><%=book.description%> </p>
+
+                <% if(currentUser){ %>
+                <% if(book.isAvailable){ %>
+                <button id="borrow-btn" type="submit" class="btn btn-secondary btn-lg p-2 px-3 mr-5 mt-3"
+                    style="font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;">Borrow</button>
+                <% }else{ %>
+                <p class="mt-4 text-lg text-secondary border-bottom d-inline">Book is not available</p>
+                <% } %>
+                <div id="borrow-dialog" title="Borrowing - <%=book.name%> ">
+                    <p class="p-3">Are you sure you want to borrow this book?</p>
+                    <hr>
+                    <div class="text-end">
+                        <form action="/book/<%=book.id%>/borrow" method="POST" class="d-inline">
+                            <button class="btn btn-outline-secondary">Yes</button>
+                        </form>
+                        <button id="borrow-dialog-close-btn" class="btn btn-outline-secondary">No</button>
+                    </div>
+                </div>
+                <% }else{ %>
+                    <p class="mt-4 border-bottom d-inline text-secondary text-lg">To borrow the book, please <span><a
+                        href="/login" style="text-decoration: none;">login</a></span> or <span><a
+                        href="/register" style="text-decoration: none;">Register</a></span>!</p>
+                <% } %> 
+
+        </div>
+        <form action="/book/<%=book._id%>/read" method="POST" class="mb-3 text-end">
+            <% if(currentUser){ %>
+            <% if(currentUser.booksRead.some(bk => bk.bookId === String(book._id))){ %>
+            <p class="text-secondary border-bottom d-inline text-lg p-2">Already Read!</p>
+            <% }else{ %>
+            Done Reading? <button type="submit" class="btn btn-secondary btn-sm p-0 px-2 mr-5">Yes</button>
+            <% } %>
+            <% } %>
+        </form>
+    </div>
+</div>
+
+<div class="mt-5">
+    <ul>
+    </ul>
+    <div class="row">
+        <div class="col-8 border-2 p-3 mb-3">
+            <h2 class="text-center mb-3">
+                Best points
+            </h2>
+            <ul>
+
+                <%for(let review of book.reviews){%>
+                <%function capitalizeFirstLetter(string) {
+                        return string.charAt(0).toUpperCase() + string.slice(1);}%>
+
+                <p><%=review.body%> - <%=capitalizeFirstLetter(review.postedBy.username)%> </p>
+                <% } %>
+
+                <!-- <%for(let note of book.notes){%> 
+                    <li style="list-style:inside;">
+                        <%=note%> 
+                    </li>
+                <%}%>  -->
+            </ul>
+        </div>
+        <div class="col-4 p-3">
+            <% if(currentUser){ %>
+            <form action="/book/<%=book._id%>/notes/" method="POST">
+                <div class="mb-3">
+                    <label class="form-label" for="body">Write</label>
+                    <textarea class="form-control mb-3" name="review[body]" id="body" cols="30" rows="3"
+                        required></textarea>
+                    <div class="valid-feedback">
+                        Looks good!
+                    </div>
+                    <button class="btn btn-success">Submit</button>
+                </div>
+            </form>
+            <% }else{ %>
+            <p class="text-center">You must be logged in to write reviews</p>
+            <% } %>
+        </div>
+    </div>
+</div>

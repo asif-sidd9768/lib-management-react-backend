@@ -1,0 +1,90 @@
+<% layout('layouts/boilerplate') %>
+
+<div class="row" style="font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;">
+    <div class="col-md-3">
+
+        <p class="display-1 text-center text-secondary m-0"><span class="fa fa-user"></span></p>
+        <h3 class="text-center">
+            Asif Siddique
+        </h3>
+        <hr class="mx-3">
+        <p class="text-center my-4"><button id="HGoals" class="btn btn-secondary btn-sm px-2">Click to check your
+                goals</button></p>
+        <hr class="mx-5">
+        <p class="text-center mt-4"><button id="HBooksRead" class="btn btn-secondary btn-sm px-2">Click to check the
+                books you had read!</button></p>
+        <hr class="mx-5">
+        <p class="text-center mt-4"><button id="HBooksBorrowed" class="btn btn-secondary btn-sm px-2">Click to check the
+                books you borrowed!</button></p>
+
+    </div>
+    <div class="col-md-9 px-5" style="border-left: 5px ridge black;">
+        <ul class="list-group" id="holder">
+
+        </ul>
+    </div>
+</div>
+
+
+<script>
+    $(document).ready(function () {
+        var my_div = $("#holder");
+        $("#HGoals").on("click", function () {
+
+            $.ajax({
+                    url: "/api/user"
+                })
+                .done(function (data) {
+                    $("#holder").empty()
+                    console.log("Sample of data:", data);
+                    if (data.goals.length) {
+                        for (let i = 0; i < data.goals.length; i++) {
+                            $('#holder').append(
+                                "<li class=\"list-group-item\"><a class=\"text-secondary text-lg\" href=\"/goals\">" +
+                                data.goals[i].title + "</a></li>")
+                        }
+                    } else {
+                        $("#holder").html("<h4>Ah ha! it's empty, You should set some goals!</h6>")
+                    }
+                });
+        });
+
+        $("#HBooksRead").on("click", function () {
+            $.ajax({
+                    url: "/api/user"
+                })
+                .done(function (data) {
+                    $("#holder").empty()
+                    if (data.booksRead.length) {
+                        for (let i = 0; i < data.booksRead.length; i++) {
+                            $("#holder").append("<li class=\"list-group-item\"><a href=\"/book/" +
+                                data.booksRead[i].bookId + "\">" + data.booksRead[i].bookName +
+                                "</a></li>")
+                        }
+                    } else {
+                        $("#holder").html("<h4>Ah ha! it's empty, You should read some books!</h6>")
+                    }
+                })
+        })
+
+        $("#HBooksBorrowed").on("click", function () {
+            $.ajax({
+                    url: "/api/user"
+                })
+                .done(function (data) {
+                    $("#holder").empty()
+                    console.log(data)
+                    if (data.booksBorrowed.length) {
+                        for (let i = 0; i < data.booksBorrowed.length; i++) {
+                            $("#holder").append("<li class=\"list-group-item text-lg\"><a>" + data
+                                .booksBorrowed[i].bookName +
+                                "</a><p><form class=\"text-end\" method=\"POST\" action=\"/profile/" + data.username + "/book-return/" + data.booksBorrowed[i]._id + "\"><button class=\"btn btn-danger btn-sm\">Return</button></form></p></li>"
+                            )
+                        }
+                    } else {
+                        $("#holder").html("<h4>Ah ha! it's empty, You should get some books!</h6>")
+                    }
+                })
+        })
+    });
+</script>

@@ -1,0 +1,24 @@
+<% layout('layouts/boilerplate') %> 
+
+<div class="container text-center">
+    <div class="row">
+        <div class="col-6 offset-3">
+            <form action="/quotes" method="POST">
+                <div class="mb-3">
+                    <h5 class="mb-3">Add a new quote</h5>
+                    <textarea class="form-control" name="quote[text]" placeholder="Quote text here..." id="text" cols="30" rows="3" required></textarea>
+                    <div class="valid-feedback">
+                        Looks good!
+                    </div>
+
+                    <label for="author"></label>
+                    <textarea class="form-control mb-3" name="quote[author]" placeholder="Quote author..." id="author" cols="30" rows="1" required></textarea>
+                    <div class="valid-feedback">
+                        Looks good!
+                    </div>
+                    <button class="btn btn-success">Submit</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

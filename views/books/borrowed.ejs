@@ -1,0 +1,26 @@
+<% layout('layouts/boilerplate') %>
+
+<div class="row px-5">
+    <% if(bookBorrowed.length){ %>
+    <% for(let bk of bookBorrowed){ %>
+    <div class="col-sm-4 mt-3">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title"><%=bk.bookName%> </h5>
+                <p class="card-text">Book is with : <span class="text-lg"
+                        style="font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;">
+                        <%=bk.borrowedUsername.charAt(0).toUpperCase() + bk.borrowedUsername.slice(1)%></span> </p>
+                <p id="goal-priority" class="d-none">well done</p>
+                <a href="/book/<%=bk.bookId%> " class="btn btn-outline-secondary btn-sm">View Book</a>
+            </div>
+            <div class="card-footer text-muted text-center"
+                style="font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;">
+                <span class="text-sm">Since : <%=bk.borrowedDate.toDateString()%> </span>
+            </div>
+        </div>
+    </div>
+    <% } %>
+    <% } else { %>
+        <p class="display-3" style="font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;">No one borrowed any!</p>
+    <% } %>
+</div>

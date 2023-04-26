@@ -1,0 +1,21 @@
+<% layout('layouts/boilerplate') %> 
+
+<div class="container">
+  <div class="row">
+    <div class="col-6 offset-3">
+      <% for (let quote of quotesList){ %> 
+        <div class="card">
+          <div class="card-body">
+            <figure class="text-center">
+              <blockquote class="mb-4 blockquote">
+                <p>"<%=quote.content%>"</p>
+              </blockquote>
+              <figcaption class="blockquote-footer">
+                <%=quote.author%> 
+              </figcaption>
+            </figure>
+        </div>
+        <% } %> 
+    </div>
+  </div>
+</div>
