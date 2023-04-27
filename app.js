@@ -4,6 +4,7 @@ if(process.env.NODE_ENV !== "production"){
 
 const express = require('express');
 const mongoose = require('mongoose');
+const cors = require('cors')
 const app = express();
 const Book = require('./models/books')
 const Quote = require('./models/quotes')
@@ -124,8 +125,9 @@ app.use(
     })
 )
 
-
-app.use(express.urlencoded({extended: true}))
+app.use(cors())
+app.use(express.static('build'))
+app.use(express.json())
 app.use(express.static(path.join(__dirname, 'public')))
 app.use(flash())
 
@@ -146,10 +148,15 @@ app.use((req, res, next) => {
 })
 
 app.get('/',catchAsync(async (req, res) => {
-    const books = await Book.find({})
+    const books = await Book.find({}).populate("reviews")
     // console.log(res.locals.currentUser.username)
-    res.render("books/index", {books})
+    res.status(200).send(books)
+    // res.render("books/index", {books})
 }))
+
+app.get('/test', (req, res) => {
+  res.send('jellp')
+})
 
 app.get('/book/not-available', async (req, res) => {
     const bookBorrowed = await BookBorrowed.find({})
@@ -215,23 +222,30 @@ app.post('/quotes', async (req, res) => {
     res.redirect("/quotes")
 })
 
-app.post('/book/:id/notes/', isLoggedIn, validateReview, async(req, res) => {
-    const book = await Book.findById(req.params.id)
+app.post('/book/:id/notes/', async(req, res) => {
+    const book = await Book.findById(req.params.id).populate("reviews")
     console.log("====================")
-    const {body}  = req.body.review
-    const username = req.user._id
+    console.log(req.body)
+    console.log(req.params.id)
+    // const {body}  = req.body.review
+    // const username = req.user._id
     
-    
-    console.log(body)
-    console.log(username)
+    const { review: receivedReview, username } = req.body
+    // console.log(body)
+    // console.log(username)
     const user = await User.findById(username)
-    const review = new Review(req.body.review)
+    const review = new Review({body: req.body.review})
+    console.log(user)
+    console.log(review)
+    // review = {...review, postedBy: username}
     review.postedBy = username
+    book.reviews = [...book.reviews, review]
     book.reviews.push(review)
     await review.save()
     await book.save()
-    req.flash('success', 'Review added')
-    res.redirect(`/book/${req.params.id}`)
+    res.status(200).send(review)
+    // req.flash('success', 'Review added')
+    // res.redirect(`/book/${req.params.id}`)
 })
 
 app.post('/book/:id/read', isLoggedIn, async(req, res) => {
@@ -299,11 +313,27 @@ app.post('/profile/:id/book-return/:bookId', isLoggedIn, async (req, res) => {
     res.redirect(`/profile/${req.user.username}`)
 })
 
-app.post('/login', passport.authenticate('local', { failureFlash: 'Invalid username or password', failureRedirect:'/login'}), async (req, res) => {
-    req.flash('success', 'You have logged in')
-    const redirectUrl = req.session.returnTo || '/'
-    delete req.session.returnTo
-    res.redirect(redirectUrl)
+app.post('/login', async (req, res) => {
+  // const { password } = req.body
+
+  try {
+    passport.authenticate('local', async (err, user, info) => {
+      if (err) {
+        return res.status(500).json({ error: 'Internal server error' });
+      }
+      if (!user) {
+        return res.status(401).json({ error: 'Unauthorized' });
+      }
+      req.logIn(user, async (err) => {
+        if (err) {
+          return res.status(500).json({ error: 'Internal server error' });
+        }
+        return res.status(200).json(user); // Return the user data in the response
+      });
+    })(req, res);
+  } catch (err) {
+    return res.status(500).json({ error: 'Internal server error' });
+  }
 })
 
 app.post('/register', async (req, res) => {
